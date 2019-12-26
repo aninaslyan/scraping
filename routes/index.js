@@ -4,7 +4,7 @@ const routes = express.Router();
 import { TransparentButtons } from "../transparent-buttons";
 import { TechStack } from "../tech-stack";
 
-const siteUrl = "http://www.parzlogic.com/";
+const siteUrl = "medium.com";
 
 routes.get("/transparent-buttons", async function(req, res) {
     const resultData = await TransparentButtons(siteUrl);

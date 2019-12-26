@@ -1,36 +1,56 @@
 import { cleanURL } from "./helper";
 import { fetchData } from "./helper";
 
-const transparentButtons = new Set();
-
 export const TransparentButtons = async (url) => {
     let cleanUrl = cleanURL(url);
+
+    const transparentButtons = [];
+    let transparentButtonQuantity = 0;
 
     try {
         const $ = await fetchData(cleanUrl);
 
-        // style tag
-        // $('style').each((index, element) => {
-        //     console.log($(element).html(), 'style tag');
-        //     transparentButtons.add($(element).html());
-        // });
+        // style tag content
+        let valueExpression = /background(-color)?\s*:\s*transparent/gi;
+        let valueExpressionElement = /[^}]+background(-color)?\s*:\s*transparent[^}]*}/gi;
 
-        //todo give parent element information, or some text near to that
-        $("button").attr('style',  'background-color:transparent').each((index, element) => {
-            console.log(element, 'button with transparent style');
-            transparentButtons.add($(element).html());
+        let rgbExpression = /background(-color)?\s*:\s*rgba\(\s*0,\s*0,\s*0,\s*0\s*\)/gi;
+        let rgbExpressionElement = /[^}]+background(-color)?\s*:\s*rgba\(\s*0,\s*0,\s*0,\s*0\s*\)[^}]*}/gi;
+
+        $('style').each((index, element) => {
+            let styleTagContent = $(element).html();
+
+            let matchedWithRGBAElements = styleTagContent.match(rgbExpression);
+            let matchedWithValueElements = styleTagContent.match(valueExpression);
+
+            if (matchedWithRGBAElements && matchedWithRGBAElements.length > 0) {
+                transparentButtonQuantity += matchedWithRGBAElements.length;
+                transparentButtons.push(styleTagContent.match(rgbExpressionElement));
+            } else if (matchedWithValueElements && matchedWithValueElements.length > 0) {
+                transparentButtonQuantity += matchedWithValueElements.length;
+                transparentButtons.push(styleTagContent.match(valueExpressionElement));
+            }
         });
 
-        $("a").attr('style',  'background-color:transparent').each((index, element) => {
-            console.log(element, 'a with transparent style');
-            transparentButtons.add($(element).html());
-        });
+        // style attributes
+        $("button[style='background-color:transparent'], button[style='background:transparent'], button[style='background:rgba(0, 0, 0, 0)'], button[style='background-color:transparent']")
+            .each((index, element) => {
+                transparentButtonQuantity++;
+                transparentButtons.push($(element).html());
+            });
+
+        $("a div[style='background-color:transparent'], a div[style='background:transparent'], a div[style='background:rgba(0, 0, 0, 0)'], a div[style='background-color:rgba(0, 0, 0, 0)']")
+            .each((index, element) => {
+                transparentButtonQuantity++;
+                transparentButtons.push($(element).html());
+            });
 
         return {
             url: cleanUrl,
-            transparentButtons: [...transparentButtons].sort(),
+            transparentButtons,
+            transparentButtonQuantity,
         };
-    } catch(e) {
+    } catch (e) {
         console.log(e.message, 'Bottom error');
     }
 };
