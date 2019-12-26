@@ -16,6 +16,15 @@ export const fetchData = async (siteUrl) => {
         const result = await axios.get(siteUrl);
         return cheerio.load(result.data);
     } catch (e) {
-        console.log(e.message, 'Error Message');
+        console.log(e.message, 'Error');
     }
+};
+
+export const getData = async (url) => {
+  try {
+      const response = await axios.get(url);
+      return response.data;
+  } catch(e) {
+      console.log(e.message, 'Error');
+  }
 };
