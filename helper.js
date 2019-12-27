@@ -1,6 +1,7 @@
 import URL from 'url';
 import axios from "axios";
 import cheerio from "cheerio";
+import dns from 'dns';
 
 export const cleanURL = (baseUrl) => {
     let { href, protocol } = URL.parse(baseUrl.toLocaleLowerCase());
@@ -27,4 +28,13 @@ export const getData = async (url) => {
   } catch(e) {
       console.log(e.message, 'Error');
   }
+};
+
+export async function lookupPromise(url) {
+    return new Promise((resolve, reject) => {
+        dns.lookup(url, (err, address, family) => {
+            if(err) reject(err);
+            resolve(address);
+        });
+    });
 };
